@@ -1,6 +1,24 @@
 import java.util.function.Predicate;
 
-public class PredicateFactory {
+class StringPredicateFactory extends PredicateFactory<String> {
+
+    @Override
+    public String converter(String s) {
+        return s;
+    }
+}
+
+class InteiroPredicateFactory extends PredicateFactory<Integer> {
+
+    @Override
+    public Integer converter(String s) {
+        return Integer.parseInt(s);
+    }
+}
+
+public abstract class PredicateFactory<T extends Comparable<T>> {
+
+    public abstract T converter(String s);
 
     public Predicate<String> processaCondicao(String condicao) {
 
@@ -78,70 +96,71 @@ public class PredicateFactory {
 
         }
 
-        return new RegraContem(condicao);
+        return new RegraIgualdade<>(condicao);
     }
 
     public static void main(String[] args){
-        System.out.println(new PredicateFactory().processaCondicao("+1&!+3").test("4"));
+        System.out.println(new StringPredicateFactory().processaCondicao("+1&!+3").test("2"));
+        System.out.println(new InteiroPredicateFactory().processaCondicao("+1&!+3").test(String.valueOf(2)));
     }
 
 }
 
-abstract class Regra implements Predicate<String> {
+abstract class Regra<T extends Comparable<T>> implements Predicate<T> {
 
-    protected String condicao;
+    protected T condicao;
 
-    public Regra(String condicao) {
+    public Regra(T condicao) {
         this.condicao = condicao;
     }
 }
 
-class RegraIgualdade extends Regra {
+class RegraIgualdade<T extends Comparable<T>> extends Regra<T> {
 
-    public RegraIgualdade(String condicao) {
+    public RegraIgualdade(T condicao) {
         super(condicao);
     }
 
-    public boolean test(String s) {
+    public boolean test(T s) {
         return s.equals(condicao);
     }
 
 }
 
-class RegraContem extends Regra {
+//class RegraContem<T extends Comparable<T>> extends Regra<T> {
+//
+//    public RegraContem(T condicao) {
+//        super(condicao);
+//    }
+//
+//    @Override
+//    public boolean test(T s) {
+//        return s.contains(condicao);
+//    }
+//
+//}
 
-    public RegraContem(String condicao) {
+class RegraMaior<T extends Comparable<T>> extends Regra<T> {
+
+    public RegraMaior(T condicao) {
         super(condicao);
     }
 
     @Override
-    public boolean test(String s) {
-        return s.contains(condicao);
-    }
-
-}
-
-class RegraMaior extends Regra {
-
-    public RegraMaior(String condicao) {
-        super(condicao);
-    }
-
-    @Override
-    public boolean test(String s) {
+    public boolean test(T s) {
         return s.compareTo(this.condicao) > 0;
     }
 
 }
 
-class RegraMenor extends Regra {
+class RegraMenor<T extends Comparable<T>> extends Regra<T> {
 
-    public RegraMenor(String condicao) {
+    public RegraMenor(T condicao) {
         super(condicao);
     }
 
     @Override
-    public boolean test(String s) {
+    public boolean test(T s) {
         return s.compareTo(this.condicao) < 0;
     }
 
